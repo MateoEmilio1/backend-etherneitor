@@ -9,7 +9,7 @@ require("dotenv").config({ path: ".env" });
 app.use(cors());
 app.use(express.json());
 
-const MORALIS_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6ImY0ZjM4ZmE3LWMwMDAtNDJmMy1hNDk4LWUyMWRjZTQ5YjllZSIsIm9yZ0lkIjoiMzc1MjA0IiwidXNlcklkIjoiMzg1NTc2IiwidHlwZUlkIjoiZDcxZDdhMGItMTZjMS00ODI3LWE3NDMtMjY0YzM1YjZlNzk0IiwidHlwZSI6IlBST0pFQ1QiLCJpYXQiOjE3MDY3NDcyMTgsImV4cCI6NDg2MjUwNzIxOH0.oJDlOrRc4qvTX6Dlam1lkCK50sHfKLjLWYMXNeVRLJo";
+const MORALIS_API_KEY = process.env.MORALIS_API_KEY;
 
 app.get("/getethprice", async (req, res) => {
   try {
