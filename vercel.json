@@ -1,7 +1,4 @@
 {
-  "version":2,
-  "framework":"node",
-  "name":"etherneitor",
   "builds": [
     {
       "src":"index.js",
@@ -11,7 +8,7 @@
   "routes":[
   {
     "src":"/(.*)",
-    "dest":"/index.js"
+    "dest":"/"
   }
 ]
 }
