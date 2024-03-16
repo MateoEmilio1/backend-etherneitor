@@ -15,12 +15,38 @@ app.use(express.json());
 
 const NOVES_API_KEY = process.env.NOVES_API_KEY;
 
+//GET CHAINS
+
 // Crea una nueva ruta en tu aplicación Express para manejar las solicitudes a /evm/chains
 app.get('/evm/chains', async (req, res) => {
   try {
     const options = {
       method: 'GET',
       url: 'https://foresight.noves.fi/evm/chains',
+      headers: { accept: 'application/json', apiKey: NOVES_API_KEY },
+    };
+
+    // Realiza la solicitud a la API de NOVES
+    const response = await axios.request(options);
+    const data = response.data; // Obtiene la data de la respuesta
+
+    return res.status(200).json(data); // Devuelve la data obtenida como respuesta
+  } catch (error) {
+    console.error(error);
+    return res.status(400).json({ error: 'Something went wrong' });
+  }
+});
+
+// GET DESCRIPTION
+
+// Ruta GET para obtener la descripción de una transacción
+app.get('/evm/:chain/describeTx/:txHash', async (req, res) => {
+  try {
+    const { txHash, chain } = req.params;
+
+    const options = {
+      method: 'GET',
+      url: `https://translate.noves.fi/evm/${chain}/describeTx/${txHash}`,
       headers: { accept: 'application/json', apiKey: NOVES_API_KEY },
     };
 
