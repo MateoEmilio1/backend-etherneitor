@@ -107,3 +107,25 @@ Moralis.start({
     console.log(`Listening for API Calls`);
   });
 });
+
+/* GET TRANSACTION BY HASH */
+app.post("/getTransactionByHash", async (req, res) => {
+  try {
+    const { jsonrpc, method, params, id } = req.body;
+
+    const options = {
+      method: 'POST',
+      url: 'https://mainnet.infura.io/v3/' + INFURA_API_KEY,
+      headers: { 'Content-Type': 'application/json' },
+      data: JSON.stringify({ jsonrpc, method, params, id }),
+    };
+
+    const response = await axios.request(options);
+    const data = response.data;
+
+    return res.status(200).json(data);
+  } catch (error) {
+    console.error(error);
+    return res.status(400).json({ error: 'Something went wrong' });
+  }
+});
