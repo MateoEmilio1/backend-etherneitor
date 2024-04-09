@@ -1,13 +1,67 @@
 const express = require("express");
 const app = express();
-const port = 5001;
+const port = process.env.PORT || 5001;
 const Moralis = require("moralis").default;
 const cors = require("cors");
+const axios = require("axios");
+const Web3 = require("web3");
 
 require("dotenv").config({ path: ".env" });
 
 app.use(cors());
 app.use(express.json());
+
+// NOVES
+
+const NOVES_API_KEY = process.env.NOVES_API_KEY;
+
+//GET CHAINS
+
+// Crea una nueva ruta en tu aplicación Express para manejar las solicitudes a /evm/chains
+app.get('/evm/chains', async (req, res) => {
+  try {
+    const options = {
+      method: 'GET',
+      url: 'https://foresight.noves.fi/evm/chains',
+      headers: { accept: 'application/json', apiKey: NOVES_API_KEY },
+    };
+
+    // Realiza la solicitud a la API de NOVES
+    const response = await axios.request(options);
+    const data = response.data; // Obtiene la data de la respuesta
+
+    return res.status(200).json(data); // Devuelve la data obtenida como respuesta
+  } catch (error) {
+    console.error(error);
+    return res.status(400).json({ error: 'Something went wrong' });
+  }
+});
+
+// GET DESCRIPTION
+
+// Ruta GET para obtener la descripción de una transacción
+app.get('/evm/:chain/describeTx/:txHash', async (req, res) => {
+  try {
+    const { txHash, chain } = req.params;
+
+    const options = {
+      method: 'GET',
+      url: `https://translate.noves.fi/evm/${chain}/describeTx/${txHash}`,
+      headers: { accept: 'application/json', apiKey: NOVES_API_KEY },
+    };
+
+    // Realiza la solicitud a la API de NOVES
+    const response = await axios.request(options);
+    const data = response.data; // Obtiene la data de la respuesta
+
+    return res.status(200).json(data); // Devuelve la data obtenida como respuesta
+  } catch (error) {
+    console.error(error);
+    return res.status(400).json({ error: 'Something went wrong' });
+  }
+});
+
+//MORALIS
 
 const MORALIS_API_KEY = process.env.MORALIS_API_KEY;
 const INFURA_API_KEY = process.env.INFURA_API_KEY;
@@ -52,39 +106,4 @@ Moralis.start({
   app.listen(port, () => {
     console.log(`Listening for API Calls`);
   });
-});
-
-/* GET TRANSACTION BY HASH */
-
-
-app.post("/getTransactionByHash", async (req, res) => {
-  const { hash } = req.body; // El hash de la transacción se espera en el cuerpo de la solicitud
-  
-  const provider = `https://mainnet.infura.io/v3/${INFURA_API_KEY}`;
-
-  const data = {
-    jsonrpc: '2.0',
-    method: 'eth_getTransactionByHash',
-    params: [hash],
-    id: 1,
-  };
-
-  const requestOptions = {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  };
-
-  try {
-    const response = await fetch(provider, requestOptions);
-    const responseData = await response.json();
-    res.status(200).json(responseData);
-  } catch (error) {
-    console.error('There was a problem with your fetch operation:', error);
-    res.status(500).json({ error: 'Something went wrong with the fetch operation' });
-  }
-});
-
-app.listen(5001, () => {
-  console.log(`Server running on port 5001`);
 });
