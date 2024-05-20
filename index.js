@@ -4,7 +4,6 @@ const port = process.env.PORT || 5001;
 const Moralis = require("moralis").default;
 const cors = require("cors");
 const axios = require("axios");
-const Web3 = require("web3");
 
 require("dotenv").config({ path: ".env" });
 
@@ -108,6 +107,8 @@ Moralis.start({
   });
 });
 
+//INFURA
+
 /* GET TRANSACTION BY HASH */
 app.post("/getTransactionByHash", async (req, res) => {
   try {
@@ -127,5 +128,93 @@ app.post("/getTransactionByHash", async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(400).json({ error: 'Something went wrong' });
+  }
+});
+
+/* GET LAST BLOCK NUMBER */
+app.post('/getEthLastBlockNumber', async (req, res) => {
+  try {
+    const { jsonrpc, method, params, id } = req.body;
+
+    const url = `https://mainnet.infura.io/v3/${INFURA_API_KEY}`;
+
+    const data = {
+      jsonrpc: jsonrpc || '2.0',
+      method: method || 'eth_blockNumber',
+      params: params || [],
+      id: id || 1
+    };
+
+    const options = {
+      method: 'POST',
+      url,
+      headers: { 'Content-Type': 'application/json' },
+      data: JSON.stringify(data),
+    };
+
+    const response = await axios.request(options);
+    const responseData = response.data;
+
+    return res.status(200).json(responseData);
+  } catch (error) {
+    console.error(error);
+    return res.status(400).json({ error: 'Something went wrong' });
+  }
+});
+
+/* GET ETH GAS PRICE */
+
+app.post('/getEthGasPrice', async (req, res) => {
+  try {
+    const { jsonrpc, method, params, id } = req.body;
+
+    const url = `https://mainnet.infura.io/v3/${INFURA_API_KEY}`;
+    const data = {
+      jsonrpc: jsonrpc || '2.0',
+      method: method || 'eth_gasPrice',
+      params: params || [],
+      id: id || 1
+    };
+
+    const options = {
+      method: 'POST',
+      url,
+      headers: { 'Content-Type': 'application/json' },
+      data: JSON.stringify(data),
+    };
+
+    const response = await axios.request(options);
+    const responseData = response.data;
+
+    return res.status(200).json(responseData);
+  } catch (error) {
+    console.error(error);
+    return res.status(400).json({ error: 'Something went wrong' });
+  }
+});
+
+
+
+// ETHERSCAN
+
+const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
+
+
+app.get('/getTotalNodesCount', async (req, res) => {
+  try {
+    const url = `https://api.etherscan.io/api?module=stats&action=nodecount&apikey=${ETHERSCAN_API_KEY}`;
+
+    const response = await axios.get(url);
+    const data = response.data;
+
+    if (data.status === '1') {
+      const totalNodesCount = data.result;
+      res.status(200).json({ totalNodesCount });
+    } else {
+      res.status(400).json({ error: data.message });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error fetching data from Etherscan API' });
   }
 });
