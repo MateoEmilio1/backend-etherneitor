@@ -10,32 +10,6 @@ require("dotenv").config({ path: ".env" });
 app.use(cors());
 app.use(express.json());
 
-// NOVES
-
-const NOVES_API_KEY = process.env.NOVES_API_KEY;
-
-//GET CHAINS
-
-// Crea una nueva ruta en tu aplicación Express para manejar las solicitudes a /evm/chains
-app.get('/evm/chains', async (req, res) => {
-  try {
-    const options = {
-      method: 'GET',
-      url: 'https://foresight.noves.fi/evm/chains',
-      headers: { accept: 'application/json', apiKey: NOVES_API_KEY },
-    };
-
-    // Realiza la solicitud a la API de NOVES
-    const response = await axios.request(options);
-    const data = response.data; // Obtiene la data de la respuesta
-
-    return res.status(200).json(data); // Devuelve la data obtenida como respuesta
-  } catch (error) {
-    console.error(error);
-    return res.status(400).json({ error: 'Something went wrong' });
-  }
-});
-
 // GET DESCRIPTION
 
 // Ruta GET para obtener la descripción de una transacción
@@ -193,6 +167,41 @@ app.post('/getEthGasPrice', async (req, res) => {
   }
 });
 
+/* GET LAST BLOCK, USING GET BLOCK BY NUMBER */
+
+app.post('/getLastBlock', async (req, res) => {
+  try {
+    const { jsonrpc, method, params, id } = req.body;
+
+    const url = `https://mainnet.infura.io/v3/${INFURA_API_KEY}`;
+
+    const data = {
+      jsonrpc: jsonrpc || '2.0',
+      method: method || 'eth_getBlockByNumber',
+      params: params || ['latest', true],
+      id: id || 1,
+    };
+
+    const options = {
+      method: 'POST',
+      url,
+      headers: { 'Content-Type': 'application/json' },
+      data: JSON.stringify(data),
+    };
+
+    const response = await axios.request(options);
+    const responseData = response.data;
+
+    if (responseData.result) {
+      return res.status(200).json({ block: responseData.result });
+    } else {
+      return res.status(500).json({ error: 'Block not found' });
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(400).json({ error: 'Something went wrong' });
+  }
+});
 
 
 // ETHERSCAN
